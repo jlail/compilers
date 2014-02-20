@@ -54,18 +54,19 @@
 	"
 
 # File marks:
-'0  23  11  ~/proj-yacc/proj1.y
-'1  41  0  ~/proj-yacc/proj1.l
-'2  26  5  ~/proj-yacc/proj1.l
-'3  16  17  ~/proj-yacc/proj1.l
-'4  1  20  ~/proj-yacc/proj1.y
-'5  41  9  ~/proj-yacc/proj1.l
-'6  454  43  ~/proj-yacc/proj1.tab.c
-'7  21  0  ~/proj-yacc/proj1.l
-'8  22  1  ~/proj-yacc/proj1.l
-'9  1  0  ~/proj-yacc/test.inp
+'0  1  0  ~/.git/MERGE_MSG
+'1  23  11  ~/proj-yacc/proj1.y
+'2  41  0  ~/proj-yacc/proj1.l
+'3  26  5  ~/proj-yacc/proj1.l
+'4  16  17  ~/proj-yacc/proj1.l
+'5  1  20  ~/proj-yacc/proj1.y
+'6  41  9  ~/proj-yacc/proj1.l
+'7  454  43  ~/proj-yacc/proj1.tab.c
+'8  21  0  ~/proj-yacc/proj1.l
+'9  22  1  ~/proj-yacc/proj1.l
 
 # Jumplist (newest first):
+-'  1  0  ~/.git/MERGE_MSG
 -'  23  11  ~/proj-yacc/proj1.y
 -'  1  0  ~/proj-yacc/proj1.y
 -'  41  0  ~/proj-yacc/proj1.l
@@ -165,6 +166,9 @@
 -'  1  0  ~/proj-yacc/proj1.l
 
 # History of marks within files (newest to oldest):
+
+> ~/.git/MERGE_MSG
+	"	1	0
 
 > ~/proj-yacc/proj1.y
 	"	23	11
