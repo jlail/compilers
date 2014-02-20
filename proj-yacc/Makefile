@@ -1,4 +1,4 @@
-input=test.inp
+input=right1.inp
 debug=-dp
 
 run: proj1
