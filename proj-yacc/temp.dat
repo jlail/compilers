@@ -1,0 +1,50 @@
+
+comment \/\*([^*]|\*[^/])*\*+\/
+id [A-Za-z_][A-Za-z0-9_]*
+digit [0-9]
+whitespace [ \t\n\r]+
+
+
+{comment} 			{return COMMENT;}
+"if"					{return IF;}
+"else"				{return ELSE;}
+"while"				{return WHILE;}
+"int"					{return INT;}
+"float"				{return FLOAT;}
+{id}				{return ID;}
+[0-9]+	 			{return ICONST;}
+[0-9]*\.[0-9]+		{return FCONST;}
+"!="				{return NE;}
+"+"  				{return PLUS;}
+"-"					{return MINUS;}
+"*"					{return MULT;}
+"/"					{return DIV;}
+"="					{return ASSIGN;}
+"<"					{return LT;}
+">"					{return GT;}
+"<="				{return LE;}
+">="				{return GE;}
+"=="				{return EQ;}
+";"					{return SEMICOLON;}
+"("					{return LPAREN;}	
+")"					{return RPAREN;}
+","					{return COMMA;}
+"{"					{return LBRACE;}
+"}"					{return RBRACE;}
+"["					{return LBRACKET;}
+"]"					{return RBRACKET;}
+
+
+
+
+
+%token ERROR AND OR NOT
+%token SEMICOLON LPAREN RPAREN COMMA LBRACE RBRACE LBRACKET RBRACKET
+%token ASSIGN LT GT LE GE EQ NE
+%token INT FLOAT IF ELSE WHILE
+%token ID ICONST FCONST
+%left  PLUS
+%left  MINUS
+%left  DIV
+%left  MULT
+%token COMMENT

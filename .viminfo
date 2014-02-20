@@ -55,21 +55,21 @@
 
 # File marks:
 '0  1  0  ~/proj-yacc/proj1.l
-'1  1  0  ~/.git/MERGE_MSG
-'2  23  11  ~/proj-yacc/proj1.y
-'3  41  0  ~/proj-yacc/proj1.l
-'4  26  5  ~/proj-yacc/proj1.l
-'5  16  17  ~/proj-yacc/proj1.l
-'6  1  20  ~/proj-yacc/proj1.y
+'1  1  0  ~/proj-yacc/proj1.y
+'2  1  0  ~/.git/MERGE_MSG
+'3  23  11  ~/proj-yacc/proj1.y
+'4  41  0  ~/proj-yacc/proj1.l
+'5  26  5  ~/proj-yacc/proj1.l
+'6  16  17  ~/proj-yacc/proj1.l
 '7  41  9  ~/proj-yacc/proj1.l
 '8  454  43  ~/proj-yacc/proj1.tab.c
 '9  21  0  ~/proj-yacc/proj1.l
 
 # Jumplist (newest first):
 -'  1  0  ~/proj-yacc/proj1.l
+-'  1  0  ~/proj-yacc/proj1.y
 -'  1  0  ~/.git/MERGE_MSG
 -'  23  11  ~/proj-yacc/proj1.y
--'  1  0  ~/proj-yacc/proj1.y
 -'  41  0  ~/proj-yacc/proj1.l
 -'  26  5  ~/proj-yacc/proj1.l
 -'  16  17  ~/proj-yacc/proj1.l
@@ -270,11 +270,8 @@
 	+	26	5
 	+	41	0
 
-> ~/.git/MERGE_MSG
-	"	1	0
-
 > ~/proj-yacc/proj1.y
-	"	23	11
+	"	1	0
 	^	1	23
 	.	1	20
 	+	11	10
@@ -307,6 +304,9 @@
 	+	1	22
 	+	23	46
 	+	1	20
+
+> ~/.git/MERGE_MSG
+	"	1	0
 
 > ~/proj-yacc/proj1.tab.c
 	"	454	43
