@@ -1,4 +1,16 @@
+//declaration test section
 int x = 5;
 int i, j, k;
 float y = 5.0;
 int i[100][200], j[50];
+
+//comment test section
+/* comment here */
+//comment blah blah blah
+int y = 5.128617; //comment after line
+/* comment
+* multi
+* line
+* test**and multi asterisk*******/
+
+

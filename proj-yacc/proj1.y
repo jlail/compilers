@@ -2,6 +2,7 @@
 %token COMMA
 %token SEMICOLON
 %token ASSIGN
+%token COMMENT
 %token ID
 %token INT
 %token FLOAT
@@ -21,8 +22,11 @@
 %}
 
 %%
-input : 	input line | line
-line : 		operator assign multidec SEMICOLON 
+input : 	line input 
+			| comment input
+			| line 
+			| comment
+line : 		operator assign multidec semicolon comment
 			| epsilon
 multidec: 	comma assign multidec 
 			| epsilon
@@ -35,6 +39,8 @@ array:		LBRACKET ICONST RBRACKET array
 			| epsilon
 operator: 	INT | FLOAT
 number: 	ICONST | FCONST
+comment: 	COMMENT | epsilon
+semicolon:	SEMICOLON | epsilon
 epsilon:
 %%
     #include "./lex.yy.c"
