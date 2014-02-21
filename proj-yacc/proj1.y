@@ -43,16 +43,16 @@ input : 			iteration input
 					| iteration
 					| conditional
 
-iteration :			while statement
+iteration :			while block
 					| while LBRACE input RBRACE
-					| statement
+					| block
 
-conditional :		if statement
-					| if statement else statement
-					| if LBRACE statement RBRACE
-					| if LBRACE statement RBRACE else LBRACE statement RBRACE
-					| if statement else LBRACE statement 
-					| if LBRACE statement RBRACE else statement 
+conditional :		if block
+					| if block else block
+					| if LBRACE block RBRACE
+					| if LBRACE block RBRACE else LBRACE block RBRACE
+					| if block else LBRACE block 
+					| if LBRACE block RBRACE else block 
 
 if :				IF eqparens
 
@@ -64,6 +64,16 @@ eqparens :			LPAREN equality RPAREN
 					| LPAREN eqparens RPAREN
 					| LPAREN NOT equality RPAREN
 					| LPAREN NOT eqparens RPAREN
+					| LPAREN and RPAREN
+					| LPAREN or RPAREN
+
+and :				equality AND equality
+					| equality AND and
+					| equality AND OR
+
+or :				equality OR equality
+					| equality OR or
+					| equality OR and	
 
 equality :			id EQ id 
 					| id EQ number 
@@ -80,6 +90,9 @@ equality :			id EQ id
 					| id
 					| number
 	
+
+block :				statement block
+					| statement
 
 statement :			declaration 
 					| assign 
