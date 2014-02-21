@@ -37,28 +37,94 @@
 %}
 
 %%
-input : 	line input 
-			| comment input
-			| line 
-			| comment
-			| epsilon
+input :			statement input
+				| statement
 
-line : 		operator assign multidec semicolon comment
+statement :		declaration
+				| assign
+				| iteration			
+				| conditional
+				| LBRACE statement RBRACE
 
-multidec: 	COMMA assign multidec 
-			| epsilon
+declaration :	type id multidec SEMICOLON
 
-assign: 	ID ASSIGN number
-			| ID array
+assign :		id ASSIGN number SEMICOLON
+				| id ASSIGN number math SEMICOLON
+				| id ASSIGN id SEMICOLON
+				| id ASSIGN id math SEMICOLON
 
-array:		LBRACKET ICONST RBRACKET array 
-			| LBRACKET ICONST RBRACKET
-			| epsilon
+iteration :		while statement
 
-operator: 	INT | FLOAT
-number: 	ICONST | FCONST
-comment: 	COMMENT | epsilon
-semicolon:	SEMICOLON | epsilon
-epsilon:
+conditional :	if statement ELSE statement
+				| if statement
+
+if :			IF eqparens
+
+while :			WHILE eqparens
+
+eqparens :		LPAREN equality RPAREN
+				| LPAREN NOT eqparens RPAREN
+				| LPAREN eqparens RPAREN
+				| LPAREN NOT equality RPAREN
+				| LPAREN and RPAREN
+				| LPAREN or RPAREN
+
+and :			equality AND equality
+				| equality AND and
+				| equality AND or
+
+or :			equality OR equality
+				| equality OR or
+				| equality OR and				
+
+equality :		id EQ id 
+				| id EQ number 
+				| id NE id 
+				| id NE number 	
+				| id GE id 
+				| id GE number 
+				| id LE id 
+				| id LE number 		
+				| id GT id 
+				| id GT number 
+				| id LT id 
+				| id LT number 
+				| NOT id 
+				| NOT number
+				| id
+				| number
+				
+id :			ID arraydec
+				| ID
+
+type :			INT
+				| FLOAT
+
+multidec :		COMMA id multidec
+				| epsilon
+
+number :		ICONST
+				| FCONST
+
+math :			PLUS number
+				| MINUS number
+				| DIV number
+				| MULT number
+				| PLUS number math
+				| MINUS number math
+				| DIV number math
+				| MULT number math
+				| PLUS id
+				| MINUS id
+				| DIV id
+				| MULT id
+				| PLUS id math
+				| MINUS id math
+				| DIV id math
+				| MULT id math
+
+arraydec :		LBRACKET ICONST RBRACKET
+				| LBRACKET ICONST RBRACKET arraydec	
+epsilon :
 %%
     #include "./lex.yy.c"

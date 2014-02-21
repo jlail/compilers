@@ -32,10 +32,10 @@
 "&&"								{ return AND; }
 "||"								{ return OR; }
 "!"									{ return NOT; }
-"("									{ return RPAREN; }
-")"									{ return LPAREN; }
-"{"									{ return RBRACE; }
-"}"									{ return LBRACE; }
+"("									{ return LPAREN; }
+")"									{ return RPAREN; }
+"{"									{ return LBRACE; }
+"}"									{ return RBRACE; }
 "["									{ return LBRACKET; }
 "]"									{ return RBRACKET; }
 [A-Za-z_][A-Za-z_0-9]*	 			{ return ID; }

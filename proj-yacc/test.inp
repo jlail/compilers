@@ -1,14 +1,19 @@
-//declaration test section
-int x = 5;
-int i, j, k;
-float y = 5.0;
-int i[100][200], j[50];
+int x, y, z;
+float a[100], b[200], c[12][12][12][12];
 
-//comment test section
-/* comment here */
-//comment blah blah blah
-int y = 5.128617; //comment after line
-/* comment
-* multi
-* line
-* test**and multi asterisk*******/
+y = 5;
+z = 10 + 2;
+x = y + z;
+
+while (x == 5)
+{
+	y = 3 + z;
+}
+
+while (x >= z)
+	z = z + 1;
+
+while (!(x))
+{
+	x = z + y - a[100];
+}

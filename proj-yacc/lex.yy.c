@@ -822,22 +822,22 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 14 "proj1.l"
-{ return PLUS;}
+{ return PLUS; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 15 "proj1.l"
-{ return MINUS;}
+{ return MINUS; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 16 "proj1.l"
-{ return MULT;}
+{ return MULT; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 17 "proj1.l"
-{ return DIV;}
+{ return DIV; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
@@ -867,32 +867,32 @@ YY_RULE_SETUP
 case 13:
 YY_RULE_SETUP
 #line 23 "proj1.l"
-{ return LT;}
+{ return LT; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 24 "proj1.l"
-{ return GT;}
+{ return GT; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 25 "proj1.l"
-{ return LE;}
+{ return LE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 26 "proj1.l"
-{ return GE;}
+{ return GE; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 27 "proj1.l"
-{ return EQ;}
+{ return EQ; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 28 "proj1.l"
-{ return NE;}
+{ return NE; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
@@ -927,22 +927,22 @@ YY_RULE_SETUP
 case 25:
 YY_RULE_SETUP
 #line 35 "proj1.l"
-{ return RPAREN; }
+{ return LPAREN; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 36 "proj1.l"
-{ return LPAREN; }
+{ return RPAREN; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 37 "proj1.l"
-{ return RBRACE; }
+{ return LBRACE; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 38 "proj1.l"
-{ return LBRACE; }
+{ return RBRACE; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
