@@ -91,6 +91,8 @@ assign :			id ASSIGN number SEMICOLON
 					| id ASSIGN id SEMICOLON
 					| id ASSIGN number math SEMICOLON
 					| id ASSIGN id math SEMICOLON
+					| id ASSIGN PLUS number SEMICOLON
+					| id ASSIGN MINUS number SEMICOLON
 					
 arraydec :			LBRACKET ICONST RBRACKET
 					| LBRACKET ICONST RBRACKET arraydec	
