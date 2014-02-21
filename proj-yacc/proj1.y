@@ -42,6 +42,8 @@ input : 			iteration input
 					| conditional input
 					| iteration
 					| conditional
+					| LBRACE input RBRACE
+					| LBRACE input RBRACE input
 
 iteration :			while block
 					| while LBRACE input RBRACE
@@ -75,21 +77,15 @@ or :				equality OR equality
 					| equality OR or
 					| equality OR and	
 
-equality :			id EQ id 
-					| id EQ number 
-					| id NE id 
-					| id NE number 	
-					| id GE id 
-					| id GE number 
-					| id LE id 
-					| id LE number 		
-					| id GT id 
-					| id GT number 
-					| id LT id 
-					| id LT number 
-					| id
-					| number
-	
+equality :			math EQ math 
+					| math NE math 
+					| math GE math 
+					| math LE math 
+					| math GT math 
+					| math LT math 
+					| math
+
+
 
 block :				statement block
 					| statement
@@ -100,13 +96,8 @@ statement :			declaration
 declaration :		type id SEMICOLON
 					| type id multidec SEMICOLON
 
-assign :			id ASSIGN number SEMICOLON
-					| id ASSIGN id SEMICOLON
-					| id ASSIGN number math SEMICOLON
-					| id ASSIGN id math SEMICOLON
-					| id ASSIGN PLUS number SEMICOLON
-					| id ASSIGN MINUS number SEMICOLON
-					
+assign :			id ASSIGN math SEMICOLON
+
 arraydec :			LBRACKET ICONST RBRACKET
 					| LBRACKET ICONST RBRACKET arraydec	
 					| LBRACKET ID RBRACKET
@@ -124,23 +115,24 @@ id :				ID
 number :			ICONST
 					| FCONST
 
-math :				PLUS number
-					| MINUS number
-					| DIV number
-					| MULT number
-					| PLUS number math
-					| MINUS number math
-					| DIV number math
-					| MULT number math
-					| PLUS id
-					| MINUS id
-					| DIV id
-					| MULT id
-					| PLUS id math
-					| MINUS id math
-					| DIV id math
-					| MULT id math
+math :				variable operator math
+					| PLUS math
+					| MINUS math					
+					| LPAREN variable operator math RPAREN 
+					| LPAREN PLUS math RPAREN
+					| LPAREN MINUS math	RPAREN
+					| LPAREN variable operator math RPAREN operator math 
+					| LPAREN PLUS math RPAREN math 
+					| LPAREN MINUS math	RPAREN math
+					| variable
 
+operator :			PLUS
+					| MINUS
+					| DIV
+					| MULT
+
+variable :        	id
+					| number
 
 %%
 
