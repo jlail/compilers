@@ -37,94 +37,96 @@
 %}
 
 %%
-input :			statement input
-				| statement
 
-statement :		declaration
-				| assign
-				| iteration			
-				| conditional
-				| LBRACE statement RBRACE
+input : 			iteration input
+					| conditional input
+					| iteration
+					| conditional
 
-declaration :	type id multidec SEMICOLON
+iteration :			while statement
+					| while LBRACE input RBRACE
+					| statement
 
-assign :		id ASSIGN number SEMICOLON
-				| id ASSIGN number math SEMICOLON
-				| id ASSIGN id SEMICOLON
-				| id ASSIGN id math SEMICOLON
+conditional :		if statement
+					| if statement else statement
+					| if LBRACE statement RBRACE
+					| if LBRACE statement RBRACE else LBRACE statement RBRACE
+					| if statement else LBRACE statement 
+					| if LBRACE statement RBRACE else statement 
 
-iteration :		while statement
+if :				IF eqparens
 
-conditional :	if statement ELSE statement
-				| if statement
+else :				ELSE
 
-if :			IF eqparens
+while :				WHILE eqparens
 
-while :			WHILE eqparens
+eqparens :			LPAREN equality RPAREN
+					| LPAREN eqparens RPAREN
+					| LPAREN NOT equality RPAREN
+					| LPAREN NOT eqparens RPAREN
 
-eqparens :		LPAREN equality RPAREN
-				| LPAREN NOT eqparens RPAREN
-				| LPAREN eqparens RPAREN
-				| LPAREN NOT equality RPAREN
-				| LPAREN and RPAREN
-				| LPAREN or RPAREN
+equality :			id EQ id 
+					| id EQ number 
+					| id NE id 
+					| id NE number 	
+					| id GE id 
+					| id GE number 
+					| id LE id 
+					| id LE number 		
+					| id GT id 
+					| id GT number 
+					| id LT id 
+					| id LT number 
+					| id
+					| number
+	
 
-and :			equality AND equality
-				| equality AND and
-				| equality AND or
+statement :			declaration 
+					| assign 
 
-or :			equality OR equality
-				| equality OR or
-				| equality OR and				
+declaration :		type id SEMICOLON
+					| type id multidec SEMICOLON
 
-equality :		id EQ id 
-				| id EQ number 
-				| id NE id 
-				| id NE number 	
-				| id GE id 
-				| id GE number 
-				| id LE id 
-				| id LE number 		
-				| id GT id 
-				| id GT number 
-				| id LT id 
-				| id LT number 
-				| NOT id 
-				| NOT number
-				| id
-				| number
-				
-id :			ID arraydec
-				| ID
+assign :			id ASSIGN number SEMICOLON
+					| id ASSIGN id SEMICOLON
+					| id ASSIGN number math SEMICOLON
+					| id ASSIGN id math SEMICOLON
+					
+arraydec :			LBRACKET ICONST RBRACKET
+					| LBRACKET ICONST RBRACKET arraydec	
+					| LBRACKET ID RBRACKET
+					| LBRACKET ID RBRACKET arraydec	
 
-type :			INT
-				| FLOAT
+multidec :			COMMA id 
+					| COMMA id multidec
 
-multidec :		COMMA id multidec
-				| epsilon
+type :				INT
+					| FLOAT
 
-number :		ICONST
-				| FCONST
+id :				ID
+					| ID arraydec
 
-math :			PLUS number
-				| MINUS number
-				| DIV number
-				| MULT number
-				| PLUS number math
-				| MINUS number math
-				| DIV number math
-				| MULT number math
-				| PLUS id
-				| MINUS id
-				| DIV id
-				| MULT id
-				| PLUS id math
-				| MINUS id math
-				| DIV id math
-				| MULT id math
+number :			ICONST
+					| FCONST
 
-arraydec :		LBRACKET ICONST RBRACKET
-				| LBRACKET ICONST RBRACKET arraydec	
-epsilon :
+math :				PLUS number
+					| MINUS number
+					| DIV number
+					| MULT number
+					| PLUS number math
+					| MINUS number math
+					| DIV number math
+					| MULT number math
+					| PLUS id
+					| MINUS id
+					| DIV id
+					| MULT id
+					| PLUS id math
+					| MINUS id math
+					| DIV id math
+					| MULT id math
+
+
 %%
+
     #include "./lex.yy.c"
