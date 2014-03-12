@@ -10,4 +10,4 @@ proj1: driver.c proj1.y proj1.l
 	gcc -o proj1 -I. driver.c proj1.tab.c
 
 clean: 
-	rm proj1 lex.yy.c proj1.tab.c
+	rm proj1 lex.yy.c proj1.tab.c *.o
