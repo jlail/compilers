@@ -1,0 +1,160 @@
+include utils.incl
+
+
+<parameter in default="" message="input file name"/>
+<parameter out  default="" message="output file name"/>
+
+<input syntax="proj1.code" from=(in) to=input/>
+<eval PRINT(input); />
+
+<define PARSE CODE.Start/> 
+<code Base/>
+<code Base2/>
+<code Stmt_list/>
+<code Stmt_list2/>
+<code Stmt/>
+<code Conditional_stmt/>
+<code Else_stmt/>
+<code While_stmt/>
+<code Compound_stmt/>
+<code Decl_list/>
+<code Decl_list2/>
+<code Decl/>
+<code Type_spec/>
+<code Iden_list/>
+<code Iden/>
+<code Iden2/>
+<code Array_ind/>
+<code Exp/>
+<code Exp2/>
+<code Assign_exp/>
+<code Assign_exp2/>
+<code Logic_OR_exp/>
+<code Logic_OR_exp2/>
+<code Logic_AND_exp/>
+<code Logic_AND_exp2/>
+<code Equal_exp/>
+<code Equal_exp2/>
+<code Relation_exp/>
+<code Rel_exp_lt/>
+<code Rel_exp_gt/>
+<code Rel_exp_lte/>
+<code Rel_exp_gte/>
+<code Add_exp/>
+<code Add_exp_plus/>
+<code Add_exp_minus/>
+<code Mult_exp/>
+<code Mult_exp_mul/>
+<code Mult_exp_div/>
+<code Unary_exp/>
+<code Unary_exp2/>
+<code Unary_op/>
+<code Primary_exp/>
+<code Paren_exp/>
+<code Num/>
+<code Value/>
+<code ICONST/>
+<code FCONST/>
+<code IntType/>
+<code FloatType/>
+<code ArrayType pars=(type, size)/>
+
+<eval 
+	<* Build Symbol Table *>
+   table = MAP(STRING,IntType|FloatType|ArrayType);
+   PRINT("BUILDING SYMBOL TABLE");
+   foreach ( input: (foo=Decl): FALSE)
+   {
+   		type = foo[Decl.type];
+   		type = type[Type_spec.type];
+   		name = foo[Decl.iden];
+   		temp = type;
+   		for (;LEN(name) > 0;)
+   		{
+   			tempName = HEAD(name);
+	   		tempName = tempName[Iden.id];
+	   		
+	   		if (tempName[Iden2.ai] != "")
+	   		{
+	   			temp1 = tempName[Iden2.ai];
+	   			temp1 = temp1[Array_ind.ind];
+	   			temp1 = temp1[Value.v];
+	   			temp1 = temp1[Num.v1];
+	   			temp1 = temp1[ICONST.v];
+	   			if (type == "int")
+	   				temp = IntType;
+	   			if (type == "float")
+	   				temp = FloatType;
+	   			type = ArrayType(temp, temp1);
+	   		}
+	   		
+	   		tempName = tempName[Iden2.id];
+	   		if (type == "int")
+	   			type = IntType;
+	   		if (type == "float")
+	   			type = FloatType;
+	   		if (table[tempName] != "")
+	   			PRINT("ERROR - VARIABLE ALREADY DECLARED: " tempName);
+	   		else
+	   			table[tempName] = type;
+	   		name = TAIL(name);
+   		}
+   } 
+
+   <* print out the symbol table *>
+   PRINT(table);
+/>
+
+<eval
+	<* Type Checking *>
+	PRINT("TYPE CHECKING");
+	foreach( input: (foo=Exp) : FALSE)
+	{
+		PRINT("STATEMENT");
+		blah1 = foo[Exp.ex];
+		blah2 = foo[Exp.ex2];
+		if (blah2 != "")
+		{
+
+		}
+		
+		assign1 = blah1[Assign_exp.ex];
+		assign2 = blah1[Assign_exp.ex2];
+		assign1 = assign1[Logic_OR_exp.l1];
+		assign1 = assign1[Logic_AND_exp.exp];
+		assign1 = assign1[Equal_exp.exp];
+		assign1 = assign1[Relation_exp.add];
+		assign1 = assign1[Add_exp.mul];
+		assign1 = assign1[Mult_exp.exp];
+		assign1 = assign1[Unary_exp.exp];
+		assign1 = assign1[Primary_exp.exp];
+		assign1 = assign1[Value.v];
+		assign1 = assign1[Iden.id];
+		assign1 = assign1[Iden2.id];
+		type1 = table[assign1];
+
+
+		if (assign2 != "")
+		{	
+			assign2 = assign2[Assign_exp2.ex];
+			assign2 = TAIL(assign2);
+			PRINT(assign2);
+			assign2 = assign2[Assign_exp.ex];
+			assign2 = assign2[Logic_OR_exp.l1];
+			assign2 = assign2[Logic_AND_exp.exp];
+			assign2 = assign2[Equal_exp.exp];
+			assign2 = assign2[Relation_exp.add];
+			assign2 = assign2[Add_exp.mul];
+			assign2 = assign2[Mult_exp.exp];
+			assign2 = assign2[Unary_exp.exp];
+			assign2 = assign2[Primary_exp.exp];
+			assign2 = assign2[Value.v];
+		}
+		PRINT(table);
+		PRINT(type1);
+		PRINT(assign1);
+		PRINT("");
+		PRINT(assign2);
+
+	}
+/>
