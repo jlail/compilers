@@ -55,29 +55,35 @@ include utils.incl
 <code Value/>
 <code ICONST/>
 <code FCONST/>
-<code IntType/>
-<code FloatType/>
-<code ArrayType pars=(type, size)/>
-<code Type pars=(left, right)/>
 
-<xform LookupVariable pars=(table, name)>
-if (table == "")
-	PRINT("ERROR VARIABLE NOT DECLARED: " name);	
+<xform parseArray pars=(input)>
+""
+</xform>
+
+<xform LookupVariable pars=(tables, name)>
+if (!tables)
+	RETURN "";
 else
 {
-	PRINT("TODO: LOOKUP VARIABLE IN TABLE");
-
+	table = car tables;
+	ret = table[name];
+	if (ret != "")
+		RETURN ret;
+	else
+	{
+		ret = LookupVariable(cdr tables, name);
+		RETURN ret;
+	}
 }
 </xform>
 
 <eval
 x = MAP;
 XFORM.TypeChecking(input, x);
-PRINT(x);
+PRINT("PARSING COMPLETE - AST and error messages above (IF ANY)");
 />
 
 <xform TypeChecking pars=(input, tables)>
-variableToCheck = "";
 switch(input)
 {
    
@@ -88,8 +94,6 @@ case CODE.Compound_stmt#(CLEAR child):
    BREAK;
    
 case CODE.Decl#(CLEAR type, CLEAR name):
-	PRINT("XXXX");
-   PRINT(type);
    t = car tables;
 	for (; name; name=TAIL(name))
 	{
@@ -110,17 +114,16 @@ case CODE.Assign_exp#(CLEAR left, CLEAR right):
 	temp = TAIL(right);
 	temp = HEAD(temp);
 	valType = TypeChecking(temp, tables);
-	if (valType != varType)
+	if (valType == "")
+		RETURN varType;
+	else if (varType == "")
+		RETURN valType;
+	else if (valType != varType)
 	{
 	   PRINT("TYPE ERROR: " varType);
 	   PRINT("MISMATCH: " valType);
 	}
-	else
-	{
-		PRINT("TYPE IS GOOD: LEFT SIDE: " varType);
-		PRINT("RIGHT SIDE: " valType);
-	}
-	BREAK;
+	RETURN varType;
 
 case CODE.Stmt_list#(CLEAR left, CLEAR right):		
 	leftType = TypeChecking(left, tables);
@@ -135,9 +138,6 @@ case CODE.Base2#(CLEAR left, CLEAR right):
 case CODE.Exp#(CLEAR left, CLEAR right):	
 	leftType = TypeChecking(left, tables);
 	rightType = TypeChecking(right, tables);
-	PRINT(leftType);
-	PRINT(rightType);
-	PRINT(input);
 	RETURN leftType;
 	
 case CODE.Logic_OR_exp#(CLEAR left, CLEAR right):	
@@ -160,28 +160,62 @@ case CODE.Relation_exp#(CLEAR left, CLEAR right):
 	rightType = TypeChecking(right, tables);
 	RETURN leftType;
 	
-case CODE.Add_exp#(CLEAR left, CLEAR right):	
+case CODE.Add_exp#(CLEAR left, CLEAR right):
+	temp = TAIL(right);
+	temp = HEAD(temp);	
 	leftType = TypeChecking(left, tables);
-	rightType = TypeChecking(right, tables);
-	RETURN leftType;
+	rightType = TypeChecking(temp, tables);
+	if (rightType == "")
+		RETURN leftType;
+	else
+	{
+		if (leftType == rightType)
+			RETURN leftType;
+		else
+			{
+				PRINT("TYPE ERROR");
+				RETURN rightType;
+			}
+	}
 	
 case CODE.Mult_exp#(CLEAR left, CLEAR right):
+	temp = TAIL(right);
+	temp = HEAD(temp);	
 	leftType = TypeChecking(left, tables);
-	rightType = TypeChecking(right, tables);
-	RETURN leftType;
-	
+	rightType = TypeChecking(temp, tables);
+	if (rightType == "")
+		RETURN leftType;
+	else
+	{
+		if (leftType == rightType)
+			RETURN leftType;
+		else
+			{
+				PRINT("TYPE ERROR");
+				RETURN rightType;
+			}
+	}
 case CODE.Num#(CLEAR left, CLEAR right):
-	RETURN "int";
+	leftSide = left[ICONST.v];
+	rightSide = right[FCONST.v];
+	if (rightSide == "")
+		RETURN "int";
+	else
+		RETURN "float";
 	
 	
-case CODE.Iden2#(CLEAR id):
+case CODE.Iden2#(CLEAR id, CLEAR array):
+	name = id;
+	ret = LookupVariable(tables, name);
+	if (ret == "")
+	{
+		PRINT("NO VARIABLE OF THAT NAME EXISTS IN THIS SCOPE");
+	}
+	RETURN ret
 	
-	RETURN "int";
 	
 	
-	
-default: PRINT("=======================");
+default: ""
 
 }
 </xform>
-

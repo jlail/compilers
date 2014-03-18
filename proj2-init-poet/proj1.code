@@ -108,9 +108,7 @@ while (@exp@) @st@
 
 <code Iden_list parse=LIST(Iden, ",")/>
 
-<code Iden pars=(id: 
-
-en2 | ID) rebuild=id>
+<code Iden pars=(id: Iden2 | ID) rebuild=id>
 @id@
 </code>
 
