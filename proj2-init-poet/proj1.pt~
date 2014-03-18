@@ -106,7 +106,6 @@ case CODE.Stmt_list#(CLEAR statement, CLEAR stmtList):
 	
 case CODE.Assign_exp#(CLEAR left, CLEAR right):
 	varType = TypeChecking(left, tables);
-	
 	temp = TAIL(right);
 	temp = HEAD(temp);
 	valType = TypeChecking(temp, tables);
