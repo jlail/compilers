@@ -1,10 +1,6 @@
 {
-	int x, y, z;
-	y = 5.5;
-	if (x > 3)
-	{
-		float a;
-		a = 1.1;
-	}
-	a = 2;
+	int x, i;
+	int y;
+	x = 0;
+	x = 1.1;
 }

@@ -89,9 +89,24 @@ switch(input)
    
 case CODE.Compound_stmt#(CLEAR child):
    x = MAP;
-   newtables = x :: tables; 	
+   newtables = x :: tables;
    TypeChecking(child, newtables);
    BREAK;
+
+case (first last):
+	TypeChecking(first, tables);
+	for (; last; last=cdr(last))
+	{
+		TypeChecking(last, tables);
+	}
+	BREAK;
+
+
+case CODE.Unary_exp2#(CLEAR left, CLEAR right):
+	leftType = TypeChecking(left, tables);
+	rightType = TypeChecking(right, tables);
+	RETURN rightType;
+
    
 case CODE.Decl#(CLEAR type, CLEAR name):
    t = car tables;
@@ -102,6 +117,19 @@ case CODE.Decl#(CLEAR type, CLEAR name):
 		t[tempName] = type;
 	}
    BREAK;
+
+case CODE.Conditional_stmt#(CLEAR exp, CLEAR stmt, CLEAR els):
+	TypeChecking(exp, tables);
+	TypeChecking(stmt, tables);
+	TypeChecking(els, tables);
+
+	BREAK;
+
+case CODE.While_stmt#(CLEAR exp, CLEAR stmt):
+	TypeChecking(exp, tables);
+	TypeChecking(stmt, tables);
+
+	BREAK;
     
 case CODE.Stmt_list#(CLEAR statement, CLEAR stmtList):
 	TypeChecking(statement, tables);
@@ -150,19 +178,13 @@ case CODE.Logic_AND_exp#(CLEAR left, CLEAR right):
 	rightType = TypeChecking(right, tables);
 	RETURN leftType;
 	
+case "!":
+	BREAK;
+
+
 case CODE.Equal_exp#(CLEAR left, CLEAR right):	
-	leftType = TypeChecking(left, tables);
-	rightType = TypeChecking(right, tables);
-	RETURN leftType;
-	
-case CODE.Relation_exp#(CLEAR left, CLEAR right):	
-	leftType = TypeChecking(left, tables);
-	rightType = TypeChecking(right, tables);
-	RETURN leftType;
-	
-case CODE.Add_exp#(CLEAR left, CLEAR right):
-	temp = TAIL(right);
-	temp = HEAD(temp);	
+		temp = TAIL(right);
+	temp = HEAD(temp);
 	leftType = TypeChecking(left, tables);
 	rightType = TypeChecking(temp, tables);
 	if (rightType == "")
@@ -174,13 +196,49 @@ case CODE.Add_exp#(CLEAR left, CLEAR right):
 		else
 			{
 				PRINT("TYPE ERROR");
-				RETURN rightType;
+				RETURN leftType;
+			}
+	}
+	
+case CODE.Relation_exp#(CLEAR left, CLEAR right):	
+	temp = TAIL(right);
+	temp = HEAD(temp);
+	leftType = TypeChecking(left, tables);
+	rightType = TypeChecking(temp, tables);
+	if (rightType == "")
+		RETURN leftType;
+	else
+	{
+		if (leftType == rightType)
+			RETURN leftType;
+		else
+			{
+				PRINT("TYPE ERROR");
+				RETURN leftType;
+			}
+	}
+
+case CODE.Add_exp#(CLEAR left, CLEAR right):
+	temp = TAIL(right);
+	temp = HEAD(temp);
+	leftType = TypeChecking(left, tables);
+	rightType = TypeChecking(temp, tables);
+	if (rightType == "")
+		RETURN leftType;
+	else
+	{
+		if (leftType == rightType)
+			RETURN leftType;
+		else
+			{
+				PRINT("TYPE ERROR");
+				RETURN leftType;
 			}
 	}
 	
 case CODE.Mult_exp#(CLEAR left, CLEAR right):
 	temp = TAIL(right);
-	temp = HEAD(temp);	
+	temp = HEAD(temp);
 	leftType = TypeChecking(left, tables);
 	rightType = TypeChecking(temp, tables);
 	if (rightType == "")
@@ -195,6 +253,7 @@ case CODE.Mult_exp#(CLEAR left, CLEAR right):
 				RETURN rightType;
 			}
 	}
+
 case CODE.Num#(CLEAR left, CLEAR right):
 	leftSide = left[ICONST.v];
 	rightSide = right[FCONST.v];
@@ -209,13 +268,11 @@ case CODE.Iden2#(CLEAR id, CLEAR array):
 	ret = LookupVariable(tables, name);
 	if (ret == "")
 	{
-		PRINT("NO VARIABLE OF THAT NAME EXISTS IN THIS SCOPE");
+		PRINT("NO VARIABLE OF THIS NAME EXISTS IN THIS SCOPE: " name);
 	}
 	RETURN ret
 	
-	
-	
-default: ""
-
+case "":
+	RETURN "";
 }
 </xform>
