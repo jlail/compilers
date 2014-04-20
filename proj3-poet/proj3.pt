@@ -1,0 +1,11 @@
+<*=============driver code =============*>
+<input syntax="Cfront.code" parse=CODE.StmtList from="" to=ast/>
+
+<* use the print out to figure out the AST definitions in POET/lib/Cfront.code; 
+  comment it out before your final submission*>
+<eval PRINT(ast); />
+
+<* If you plan to work on 3-adress code generation, please check out 
+  code in POET/examples/compiler_5.pt; 
+   If you plan to work on control flow graph construction, please check
+  out code in POET/examples/compiler_6.pt. *>

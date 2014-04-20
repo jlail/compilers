@@ -1,0 +1,16 @@
+   int i,j;
+   float X[100],A[100],Y[100];
+   int M;
+   int lda;
+
+   i = 0; 
+   while (i < M) 
+   {
+     j = 0; 
+     while (j < i) 
+     {
+         X[i] = X[i] - A[j*lda+i] * Y[j];
+         j = j + 1;
+     }
+     i = i + 1;
+   }
