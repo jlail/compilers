@@ -1,11 +1,72 @@
 <*=============driver code =============*>
 <input syntax="Cfront.code" parse=CODE.StmtList from="" to=ast/>
 
-<* use the print out to figure out the AST definitions in POET/lib/Cfront.code; 
-  comment it out before your final submission*>
-<eval PRINT(ast); />
 
 <* If you plan to work on 3-adress code generation, please check out 
   code in POET/examples/compiler_5.pt; 
    If you plan to work on control flow graph construction, please check
   out code in POET/examples/compiler_6.pt. *>
+
+
+
+<*============== control flow graph IR and management =====*>
+<define cfg_nodes 0/> <* resulting CFG nodes generated *>
+<define cfg_edges 0/> <* resulting CFG edges generated *>
+<define label_index 0/>  <* index of new basic blocks created *>
+
+<* a function that returns a new label *>
+<xform new_label > GLOBAL.label_index=GLOBAL.label_index+1; GLOBAL.label_index </xform>
+
+<* basic block IR date structure *>
+<code BasicBlock pars=(label, stmts)>
+B@label@[@CODE.print_list#(stmts,"")@]
+</code>
+
+<* CFG edge IR date structure *>
+<code Flow pars=(from, to)>
+B@from@->B@to@
+</code>
+
+<code CFG pars=(nodes, edges)>
+digraph CFG
+{
+  @CODE.print_list#(nodes,"\n")@
+  @CODE.print_list#(edges,"\n")@
+}
+
+</code>
+<* print out the content backward *> 
+<code print_list pars=(content,sep)>
+@((TAIL(content) : "")? HEAD(content) : 
+  (print_list#(TAIL(content),sep) sep HEAD(content)))@
+</code>
+
+<* a function for generate a new basic block *>
+<xform new_basicblock pars=(stmts)>
+label = GLOBAL.label_index;
+GLOBAL.cfg_nodes = BasicBlock#(label, stmts) :: GLOBAL.cfg_nodes;
+GLOBAL.label_index = GLOBAL.label_index + 1;
+label
+</xform>
+
+<* a function for generate a new cfg edge *>
+<xform new_flow pars=(from, to)>
+GLOBAL.cfg_edges = Flow#(from, to) :: GLOBAL.cfg_edges;
+</xform>
+
+<xform Analyze_AST pars=(input,begin)>
+	PRINT(input);
+	switch(input) {
+
+	}
+</xform>
+
+<* use the print out to figure out the AST definitions in POET/lib/Cfront.code; 
+  comment it out before your final submission*>
+
+<eval 	
+	PRINT(ast); 
+	last = Analyze_AST(ast, "");
+	new_basicblock("");
+/>
+
