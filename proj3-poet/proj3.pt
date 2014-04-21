@@ -92,40 +92,59 @@ GLOBAL.cfg_edges = Flow#(from, to) :: GLOBAL.cfg_edges;
   	CODE.Assign#(stmt) = exp;
   	stmtLeft = stmt[0];
   	stmtRight = stmt[1];
+  	leftSide = stmt[0];
+  	if (stmtLeft : CODE.ArrayAccess)
+  	{
+  		CODE.ArrayAccess#(arrayID, arrayIndex) = stmtLeft;
+  		PRINT(arrayID);
+  		PRINT(arrayIndex);
+  		temp = SPLIT("\"", arrayIndex);
+  		head = car(temp);
+  		tail = cdr(temp);
+  		leftSide = arrayID ^ "[" ^ head ^ "]";
+  		for (; tail; tail = cdr(tail))
+  		{
+  			head = car(tail);
+  			leftSide = leftSide ^ "[" ^ head ^ "]";
+  		}
+
+  	}
   	if (stmtRight : CODE.Bop)
   	{
-  	  	rightSide = XFORM.GetRightSide(stmtRight);
+  	  	rightSide = XFORM.GetBinaryOperatorStmt(stmtRight);
   	}
   	else
   	{
   		rightSide = stmtRight;
   	}
-  	CLEAR stmt = stmtLeft ^ " = " ^ rightSide ^ ";";
-
+  	CLEAR stmt = leftSide ^ " = " ^ rightSide ^ ";";
   	stmt :: begin;
 
 
   case CODE.Nest#(CLEAR control, CLEAR body):
+  	PRINT("CONDITIONAL control");
   	PRINT(control);
+  	PRINT("BODY");
   	PRINT(body);
+  	begin;
   }
 
 </xform>
 
-<xform GetRightSide pars=(stmt)>
+<xform GetBinaryOperatorStmt pars=(stmt)>
 
 	CODE.Bop#(operator, leftSide, rightSide) = stmt;
 
 	if (leftSide: CODE.Bop)
 	{
-		temp = XFORM.GetRightSide(leftSide);
+		temp = XFORM.GetBinaryOperatorStmt(leftSide);
 		PRINT("LEFT SIDE");
 		PRINT(temp);
 		leftSide = temp
 	}
 	if (rightSide: CODE.Bop)
 	{
-		tempRight = XFORM.GetRightSide(rightSide);
+		tempRight = XFORM.GetBinaryOperatorStmt(rightSide);
 		PRINT("RIGHT SIDE");
 		PRINT(tempRight);
 		rightSide = tempRight;
