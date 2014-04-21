@@ -55,9 +55,20 @@ GLOBAL.cfg_edges = Flow#(from, to) :: GLOBAL.cfg_edges;
 </xform>
 
 <xform Analyze_AST pars=(input,begin)>
-	PRINT(input);
+	type = "";
 	switch(input) {
-
+		case (head tail):
+			Analyze_AST(head,begin);
+			for (; tail; tail=cdr(tail))
+			{
+				Analyze_AST(tail, begin);
+			}
+			BREAK;
+		case CODE.VarDeclStmt#(varType, varName):
+			PRINT("XXXXXXXXXX");
+			PRINT(varType);
+			PRINT("XXXXXXXXXX");
+			BREAK;
 	}
 </xform>
 
