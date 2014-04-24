@@ -1,0 +1,204 @@
+<*=============driver code =============*>
+<input syntax="Cfront.code" parse=CODE.StmtList from="" to=ast/>
+
+
+<* If you plan to work on 3-adress code generation, please check out 
+  code in POET/examples/compiler_5.pt; 
+   If you plan to work on control flow graph construction, please check
+  out code in POET/examples/compiler_6.pt. *>
+
+<*============== control flow graph IR and management =====*>
+<define cfg_nodes NULL/> <* resulting CFG nodes generated *>
+<define cfg_edges NULL/> <* resulting CFG edges generated *>
+<define label_index 0/>  <* index of new basic blocks created *>
+
+<* a function that returns a new label *>
+<xform new_label > GLOBAL.label_index=GLOBAL.label_index+1; GLOBAL.label_index </xform>
+
+<* basic block IR date structure *>
+<code BasicBlock pars=(label, stmts)>
+B@label@[@CODE.print_list#(stmts,"")@]
+</code>
+
+<* CFG edge IR date structure *>
+<code Flow pars=(from, to)>
+B@from@->B@to@
+</code>
+
+<code CFG pars=(nodes, edges)>
+digraph CFG
+{
+  @CODE.print_list#(nodes,"\n")@
+  @CODE.print_list#(edges,"\n")@
+}
+
+</code>
+<* print out the content backward *> 
+<code print_list pars=(content,sep)>
+@((TAIL(content) : "")? HEAD(content) : 
+  (print_list#(TAIL(content),sep) sep HEAD(content)))@
+</code>
+
+<* a function for generate a new basic block *>
+<xform new_basicblock pars=(stmts)>
+label = GLOBAL.label_index;
+GLOBAL.cfg_nodes = BasicBlock#(label, stmts) :: GLOBAL.cfg_nodes;
+GLOBAL.label_index = GLOBAL.label_index + 1;
+label
+</xform>
+
+<* a function for generate a new cfg edge *>
+<xform new_flow pars=(from, to)>
+GLOBAL.cfg_edges = Flow#(from, to) :: GLOBAL.cfg_edges;
+</xform>
+
+
+
+<*=============== translation schemes for control flow graph contruction =========*>
+
+<* implement translation scheme for all productions of non-terminal VarDeclStmt *>
+
+<xform BuildCFG_VarDeclStmt pars=(input, begin)>
+  switch (input) {
+
+
+    case (head tail) :  <* a list of multiple statements *>
+      next=BuildCFG_VarDeclStmt(head,begin);
+      if (tail != "") { BuildCFG_VarDeclStmt(tail,next) }
+      else { next }
+
+
+    case CODE.VarDeclStmt#(CLEAR left, CLEAR right):
+    	switch (left){
+    		case CODE.IntType#(CLEAR type):
+    			varType = type;
+    		case CODE.FloatType#(CLEAR type):
+    			varType = type;
+    	}
+    	switch(right){
+    		case (head tail):
+    			CODE.Variable#(varName, z) = head;
+  			for (; tail; tail=cdr(tail))
+  			{
+  				head = car(tail);
+  				CODE.Variable#(temp, z) = head;
+  				varName = varName ^ ", " ^ temp;
+  			}
+    		case CODE.Variable#(x, y):
+    			varName = x;
+    	}
+    	statement = varType ^ " " ^ varName ^ ";";
+    	statement :: begin;
+
+
+
+
+    case CODE.ExpStmt#(CLEAR exp):
+    	XFORM.BuildCFG_VarDeclStmt(exp, begin);
+    	
+    case CODE.Bop#(CLEAR op, CLEAR lhs, CLEAR rhs):
+      lhs ^ op ^ rhs;
+
+    case CODE.Assign#(CLEAR stmt):
+      stmtLeft = stmt[0];
+      stmtRight = stmt[1];
+      leftSide = stmt[0];
+      if (stmtLeft : CODE.ArrayAccess)
+      {
+        CODE.ArrayAccess#(arrayID, arrayIndex) = stmtLeft;
+        PRINT(arrayID);
+        PRINT(arrayIndex);
+        temp = SPLIT("\"", arrayIndex);
+        head = car(temp);
+        tail = cdr(temp);
+        leftSide = arrayID ^ "[" ^ head ^ "]";
+        for (; tail; tail = cdr(tail))
+        {
+          head = car(tail);
+          leftSide = leftSide ^ "[" ^ head ^ "]";
+        }
+
+      }
+      if (stmtRight : CODE.Bop)
+      {
+          rightSide = XFORM.GetBinaryOperatorStmt(stmtRight);
+      }
+      else
+      {
+        rightSide = stmtRight;
+      }
+      CLEAR stmt = leftSide ^ " = " ^ rightSide ^ ";";
+      stmt :: begin; 
+
+
+    case CODE.While#(CLEAR exp):
+      PRINT("INSIDE WHILE CASE");
+      PRINT(exp);
+      begin = BuildCFG_VarDeclStmt(exp, begin);
+      PRINT(begin);
+      begin;
+
+
+    case CODE.Nest#(CLEAR control, CLEAR body):
+    	PRINT("-----CONDITIONAL control-----");
+    	PRINT(control);
+      PRINT(body);
+      PRINT(begin);
+      if (control: CODE.While)
+      {
+      <*//change loop to just get shit prior to while loop
+      //then create new block with only conditional
+      //link together
+      //create block of body
+      //link
+      //create exit block *>
+        previousBlock = new_basicblock(begin);
+        begin = NULL;
+        loop = new_basicblock(BuildCFG_VarDeclStmt(control, begin));
+        begin = NULL;
+        PRINT("-----BODY------");
+        PRINT(BuildCFG_VarDeclStmt(body, begin));
+        bodyNode = new_basicblock(BuildCFG_VarDeclStmt(body, begin));
+        exitLabel = new_label();
+        new_flow(previousBlock, loop);
+        new_flow(loop, bodyNode);
+        new_flow(bodyNode, loop);
+        new_flow(loop, exitLabel);
+      }
+  }
+
+</xform>
+
+<xform GetBinaryOperatorStmt pars=(stmt)>
+
+	CODE.Bop#(operator, leftSide, rightSide) = stmt;
+
+	if (leftSide: CODE.Bop)
+	{
+		temp = XFORM.GetBinaryOperatorStmt(leftSide);
+		PRINT("LEFT SIDE");
+		PRINT(temp);
+		leftSide = temp
+	}
+	if (rightSide: CODE.Bop)
+	{
+		tempRight = XFORM.GetBinaryOperatorStmt(rightSide);
+		PRINT("RIGHT SIDE");
+		PRINT(tempRight);
+		rightSide = tempRight;
+	}
+	PRINT("LEAVING FUNCTION");
+	returnValue = leftSide ^ operator ^ rightSide;
+</xform>
+
+
+<* use the print out to figure out the AST definitions in POET/lib/Cfront.code; 
+  comment it out before your final submission*>
+
+<eval 	
+	PRINT(ast); 
+	last = BuildCFG_VarDeclStmt(ast, "");
+	tree = CFG(cfg_nodes, cfg_edges);
+  PRINT("=====PRINTING TREE=====");
+	PRINT(tree);
+/>

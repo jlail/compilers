@@ -60,108 +60,237 @@ GLOBAL.cfg_edges = Flow#(from, to) :: GLOBAL.cfg_edges;
 
 <xform BuildCFG_VarDeclStmt pars=(input, begin)>
   switch (input) {
-  case CODE.VarDeclStmt#(CLEAR left, CLEAR right):
-  	switch (left){
-  		case CODE.IntType#(CLEAR type):
-  			varType = type;
-  		case CODE.FloatType#(CLEAR type):
-  			varType = type;
-  	}
-  	switch(right){
-  		case (head tail):
-  			CODE.Variable#(varName, z) = head;
-			for (; tail; tail=cdr(tail))
-			{
-				head = car(tail);
-				CODE.Variable#(temp, z) = head;
-				varName = varName ^ ", " ^ temp;
-			}
-  		case CODE.Variable#(x, y):
-  			varName = x;
-  	}
-  	statement = varType ^ " " ^ varName ^ ";";
-  	statement :: begin;
 
 
-  case (head tail) :  <* a list of multiple statements *>
-    next=BuildCFG_VarDeclStmt(head,begin);
-    if (tail != "") { BuildCFG_VarDeclStmt(tail,next) }
-    else { next }
-
-  case CODE.ExpStmt#(CLEAR exp):
-  	CODE.Assign#(stmt) = exp;
-  	stmtLeft = stmt[0];
-  	stmtRight = stmt[1];
-  	leftSide = stmt[0];
-  	if (stmtLeft : CODE.ArrayAccess)
-  	{
-  		CODE.ArrayAccess#(arrayID, arrayIndex) = stmtLeft;
-  		PRINT(arrayID);
-  		PRINT(arrayIndex);
-  		temp = SPLIT("\"", arrayIndex);
-  		head = car(temp);
-  		tail = cdr(temp);
-  		leftSide = arrayID ^ "[" ^ head ^ "]";
-  		for (; tail; tail = cdr(tail))
-  		{
-  			head = car(tail);
-  			leftSide = leftSide ^ "[" ^ head ^ "]";
-  		}
-
-  	}
-  	if (stmtRight : CODE.Bop)
-  	{
-  	  	rightSide = XFORM.GetBinaryOperatorStmt(stmtRight);
-  	}
-  	else
-  	{
-  		rightSide = stmtRight;
-  	}
-  	CLEAR stmt = leftSide ^ " = " ^ rightSide ^ ";";
-  	stmt :: begin;
+    case (head tail) :  <* a list of multiple statements *>
+      next=BuildCFG_VarDeclStmt(head,begin);
+      if (tail != "") { BuildCFG_VarDeclStmt(tail,next) }
+      else  { next }
 
 
-  case CODE.Nest#(CLEAR control, CLEAR body):
-  	PRINT("CONDITIONAL control");
-  	PRINT(control);
-  	PRINT("BODY");
-  	PRINT(body);
-  	begin;
+    case CODE.VarDeclStmt#(CLEAR left, CLEAR right):
+      switch (left){
+        case CODE.IntType#(CLEAR type):
+          varType = type;
+        case CODE.FloatType#(CLEAR type):
+          varType = type;
+      }
+      switch(right){
+        case (head tail):
+          CODE.Variable#(varName, z) = head;
+        for (; tail; tail=cdr(tail))
+        {
+          head = car(tail);
+          CODE.Variable#(temp, z) = head;
+          varName = varName ^ ", " ^ temp;
+        }
+        case CODE.Variable#(x, y):
+          varName = x;
+      }
+      statement = varType ^ " " ^ varName ^ ";";
+      statement :: begin;
+
+
+
+
+    case CODE.ExpStmt#(CLEAR exp):
+      XFORM.BuildCFG_VarDeclStmt(exp, begin);
+      
+    case CODE.Bop#(CLEAR op, CLEAR lhs, CLEAR rhs):
+      lhs ^ op ^ rhs;
+
+    case CODE.Assign#(CLEAR stmt):
+      stmtLeft = stmt[0];
+      stmtRight = stmt[1];
+      leftSide = stmt[0];
+      if (stmtLeft : CODE.ArrayAccess)
+      {
+        CODE.ArrayAccess#(arrayID, arrayIndex) = stmtLeft;
+        temp = SPLIT("\"", arrayIndex);
+        head = car(temp);
+        tail = cdr(temp);
+        leftSide = arrayID ^ "[" ^ head ^ "]";
+        for (; tail; tail = cdr(tail))
+        {
+          head = car(tail);
+          if(head : CODE.Bop)
+          {
+            head = XFORM.GetBinaryOperatorStmt(head); 
+          }
+          leftSide = leftSide ^ "[" ^ head ^ "]";
+        }
+
+      }
+      if (stmtRight : CODE.Bop)
+      {
+          rightSide = XFORM.GetBinaryOperatorStmt(stmtRight);
+      }
+      else if (stmtRight : CODE.ArrayAccess)
+      {
+        CODE.ArrayAccess#(arrayID, arrayIndex) = stmtRight;
+        temp = SPLIT("\"", arrayIndex);
+        head = car(temp);
+        tail = cdr(temp);
+        rightSide = arrayID ^ "[" ^ head ^ "]";
+        for (; tail; tail = cdr(tail))
+        {
+          head = car(tail);
+          if(head : CODE.Bop)
+          {
+            head = XFORM.GetBinaryOperatorStmt(head); 
+          }
+          rightSide = leftSide ^ "[" ^ head ^ "]";
+        }
+      }
+      else
+      {
+        rightSide = stmtRight;
+      }
+      CLEAR stmt = leftSide ^ " = " ^ rightSide ^ ";";
+      stmt :: begin; 
+
+
+    case CODE.Nest#(CLEAR control, CLEAR body):
+      if (control: CODE.While)
+      { 
+        XFORM.WhileStmt(control, body, begin)
+      }
+      if (control: CODE.If)
+      {
+        XFORM.IfStmt(control, body, begin);
+      }
   }
 
 </xform>
 
+<xform IfStmt pars=(control, body, begin)>
+
+  CODE.If#(temp) = control;
+  PRINT("********************************");
+  PRINT(temp);
+  PRINT("********************************");
+  CODE.Uop#(unary, temp) = temp;
+  CODE.Bop#(op, lhs, rhs) = temp;
+  b_test = new_basicblock(unary ^ lhs ^ op ^ rhs); <* new basic block for test *>
+  body_label= GLOBAL.label_index; <* label for the first basic block of body *>
+  body_next = XFORM.BuildCFG_VarDeclStmt(body,""); <* lable of the last basic block from loop body *>
+  body_last = new_basicblock(body_next); <* last basic block from loop body*>
+  exit_label = new_label(); <* exit label for the loop*>
+  <* new generate cfg edges *>
+  new_flow(b_test, body_label);
+  new_flow(b_test, exit_label);
+  if (begin != "")
+  {
+    b_init = new_basicblock(begin); <* wrap up the previous basic block *>
+    new_flow(b_init, b_test);
+  }
+  ""
+</xform>
+
+<xform WhileStmt pars=(control, body, begin)>
+
+  b_init = new_basicblock(begin); <* wrap up the previous basic block *>
+  CODE.While#(temp) = control;
+  CODE.Bop#(op, lhs, rhs) = temp;
+  b_test = new_basicblock(lhs ^ op ^ rhs); <* new basic block for test *>
+  body_label= GLOBAL.label_index; <* label for the first basic block of body *>
+  body_next = XFORM.BuildCFG_VarDeclStmt(body,""); <* lable of the last basic block from loop body *>
+  body_last = new_basicblock(body_next); <* last basic block from loop body*>
+  exit_label = new_label(); <* exit label for the loop*>
+  <* new generate cfg edges *>
+  new_flow(b_init, b_test);
+  new_flow(b_test, body_label);
+  new_flow(b_test, exit_label);
+  new_flow(body_last, b_test);
+  b_init <* the exit block is currently empty*>
+</xform>
+
 <xform GetBinaryOperatorStmt pars=(stmt)>
 
-	CODE.Bop#(operator, leftSide, rightSide) = stmt;
+  CODE.Bop#(operator, leftSide, rightSide) = stmt;
+  if (leftSide : CODE.ArrayAccess)
+  {
+    CODE.ArrayAccess#(arrayID, arrayIndex) = leftSide;
+    temp = SPLIT("\"", arrayIndex);
+    head = car(temp);
+    tail = cdr(temp);
+    leftSide = arrayID ^ "[" ^ head ^ "]";
+    for (; tail; tail = cdr(tail))
+    {
+      head = car(tail);
+      if(head : CODE.Bop)
+          {
+            head = XFORM.GetBinaryOperatorStmt(head); 
+          }
+      leftSide = leftSide ^ "[" ^ head ^ "]";
+    }
 
-	if (leftSide: CODE.Bop)
-	{
-		temp = XFORM.GetBinaryOperatorStmt(leftSide);
-		PRINT("LEFT SIDE");
-		PRINT(temp);
-		leftSide = temp
-	}
-	if (rightSide: CODE.Bop)
-	{
-		tempRight = XFORM.GetBinaryOperatorStmt(rightSide);
-		PRINT("RIGHT SIDE");
-		PRINT(tempRight);
-		rightSide = tempRight;
-	}
-	PRINT("LEAVING FUNCTION");
-	returnValue = leftSide ^ operator ^ rightSide;
+  }      
+  if (rightSide : CODE.ArrayAccess)
+  {
+    CODE.ArrayAccess#(arrayID, arrayIndex) = rightSide;
+    temp = SPLIT("\"", arrayIndex);
+    head = car(temp);
+    tail = cdr(temp);
+    rightSide = arrayID ^ "[" ^ head ^ "]";
+    for (; tail; tail = cdr(tail))
+    {
+      head = car(tail);
+      if(head : CODE.Bop)
+          {
+            head = XFORM.GetBinaryOperatorStmt(head); 
+          }
+      rightSide = leftSide ^ "[" ^ head ^ "]";
+    }
+
+  }
+  if (leftSide: CODE.Bop)
+  {
+    temp = XFORM.GetBinaryOperatorStmt(leftSide);
+    leftSide = temp
+  }
+  if (rightSide: CODE.Bop)
+  {
+    tempRight = XFORM.GetBinaryOperatorStmt(rightSide);
+    rightSide = tempRight;
+  }
+  returnValue = leftSide ^ operator ^ rightSide;
 </xform>
 
 
 <* use the print out to figure out the AST definitions in POET/lib/Cfront.code; 
   comment it out before your final submission*>
 
-<eval 	
-	PRINT(ast); 
-	last = BuildCFG_VarDeclStmt(ast, "");
-	PRINT(last);
-	new_basicblock(last);
-	tree = CFG(cfg_nodes, cfg_edges);
-	PRINT(tree);
+<eval   
+  PRINT(ast); 
+  last = BuildCFG_VarDeclStmt(ast, "");
+  new_basicblock("");
+
+  PRINT("\n\n=====PRINTING TREE=====");
+  PRINT("***********************************************************************");
+  PRINT("Blocks are printing backwards.  Flow format is: [From -> To]");
+  PRINT("It also skips numbers in the middle at times and I can't resolve it");
+  PRINT("***********************************************************************\n\n");
+
+  head = car(cfg_nodes);
+  tail = cdr(cfg_nodes);
+  CODE.BasicBlock#(num, block) = head;
+  PRINT("B" ^ num ^ "[" ^ block ^ "]");
+  for (; tail; tail = cdr(tail) )
+  {
+    head = car(tail);
+    CODE.BasicBlock#(num, block) = head;
+    PRINT("B" ^ num ^ "[" ^ block ^ "]");
+  }
+
+  head = car(cfg_edges);
+  tail = cdr(cfg_edges);
+  CODE.Flow#(from, to) = head;
+  PRINT("[B" ^ from ^ "->B" ^ to ^"]");
+  for (; tail; tail = cdr(tail) )
+  {
+    head = car(tail);
+    CODE.Flow#(from, to) = head;
+    PRINT("[B" ^ from ^ "->B" ^ to ^"]");
+  }
 />
